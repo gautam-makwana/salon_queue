@@ -105,3 +105,13 @@ CREATE UNIQUE INDEX "Barber_name_key" ON "Barber"("name");
 
 -- AddForeignKey
 ALTER TABLE "EntryService" ADD CONSTRAINT "EntryService_entryId_fkey" FOREIGN KEY ("entryId") REFERENCES "QueueEntry"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Partial unique indexes for active phones and active barber assignments
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_phone_active"
+  ON "QueueEntry" ("phone")
+  WHERE status IN ('WAITING', 'CALLED', 'IN_CHAIR');
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_barber_active"
+  ON "QueueEntry" ("assignedBarber")
+  WHERE status IN ('CALLED', 'IN_CHAIR');
+
