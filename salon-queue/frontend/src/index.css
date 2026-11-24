@@ -4,98 +4,127 @@
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', Manrope, system-ui, sans-serif;
+    color: #171717;
+    background-color: #FFFFFF;
   }
 
   body {
-    @apply bg-charcoal-800 text-white min-h-screen;
+    @apply bg-white text-softblack min-h-screen selection:bg-pista selection:text-softblack;
   }
 
-  /* Ensure all interactive elements meet 44px minimum touch target */
+  /* Accessible 44px touch targets on interactive controls */
   button, a, [role="button"] {
     @apply min-h-[44px] min-w-[44px];
   }
 }
 
 @layer components {
-  /* Gold primary button */
+  /* Primary Action Button (Pista Green accent with soft black text) */
   .btn-primary {
-    @apply bg-gold text-charcoal-900 font-semibold rounded-xl px-6 py-3
-           min-h-[44px] flex items-center justify-center gap-2
-           transition-all duration-150
-           hover:bg-gold-light active:bg-gold-dark
+    @apply bg-pista text-softblack font-semibold rounded-xl px-6 py-3
+           min-h-[44px] inline-flex items-center justify-center gap-2
+           transition-all duration-200 border border-pista-border
+           hover:bg-pista-dark hover:border-pista-dark active:scale-[0.99]
+           shadow-subtle hover:shadow-card
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:active:scale-100;
+  }
+
+  /* Dark Button (Modern Soft Black) */
+  .btn-dark {
+    @apply bg-softblack text-white font-semibold rounded-xl px-6 py-3
+           min-h-[44px] inline-flex items-center justify-center gap-2
+           transition-all duration-200 border border-softblack
+           hover:bg-softblack-secondary active:scale-[0.99]
+           shadow-subtle
            disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
   }
 
-  /* Ghost/secondary button */
+  /* Secondary / Ghost button */
   .btn-secondary {
-    @apply border border-charcoal-600 text-charcoal-200 font-medium rounded-xl px-6 py-3
-           min-h-[44px] flex items-center justify-center gap-2
-           transition-all duration-150
-           hover:bg-charcoal-700 active:bg-charcoal-600
+    @apply bg-white text-softblack font-medium rounded-xl px-5 py-2.5
+           min-h-[44px] inline-flex items-center justify-center gap-2
+           transition-all duration-200 border border-softblack-border
+           hover:bg-offwhite hover:border-softblack-muted/40 active:scale-[0.99]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  /* Light Pista Button */
+  .btn-pista-light {
+    @apply bg-pista-light text-deepgreen font-semibold rounded-xl px-5 py-2.5
+           min-h-[44px] inline-flex items-center justify-center gap-2
+           transition-all duration-200 border border-pista/50
+           hover:bg-pista hover:text-softblack active:scale-[0.99]
            disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
   }
 
   /* Danger button */
   .btn-danger {
-    @apply bg-red-700 text-white font-semibold rounded-xl px-6 py-3
-           min-h-[44px] flex items-center justify-center gap-2
-           transition-all duration-150
-           hover:bg-red-600 active:bg-red-800
+    @apply bg-red-50 text-red-700 font-semibold rounded-xl px-5 py-2.5
+           min-h-[44px] inline-flex items-center justify-center gap-2
+           transition-all duration-200 border border-red-200
+           hover:bg-red-600 hover:text-white hover:border-red-600 active:scale-[0.99]
            disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
   }
 
-  /* Card container */
+  /* Minimalist Card container */
   .card {
-    @apply bg-charcoal-700 rounded-2xl p-4 shadow-lg;
+    @apply bg-white rounded-2xl p-5 border border-softblack-border/80 shadow-subtle
+           transition-all duration-200;
   }
 
-  /* Gold-accented card */
-  .card-gold {
-    @apply card border border-gold/30;
+  /* Highlighted Pista Card */
+  .card-pista {
+    @apply bg-pista-light rounded-2xl p-5 border border-pista/60 shadow-subtle;
+  }
+
+  /* Subtle Off-white Card */
+  .card-offwhite {
+    @apply bg-offwhite rounded-2xl p-5 border border-softblack-border/60;
   }
 
   /* Form input */
   .input {
-    @apply w-full bg-charcoal-800 border border-charcoal-600 rounded-xl px-4 py-3
-           text-white placeholder-charcoal-400
-           focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent
-           min-h-[44px];
+    @apply w-full bg-white border border-softblack-border rounded-xl px-4 py-3
+           text-softblack placeholder:text-softblack-muted/60
+           focus:outline-none focus:ring-2 focus:ring-pista focus:border-deepgreen
+           transition-all duration-150 min-h-[44px] shadow-subtle;
   }
 
   /* Inline error text */
   .field-error {
-    @apply text-red-400 text-sm mt-1;
+    @apply text-red-600 text-xs font-medium mt-1.5 flex items-center gap-1;
   }
 
   /* Status badge base */
   .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+           border tracking-wide;
   }
 
   /* Stale data banner */
   .stale-banner {
-    @apply w-full bg-amber-900/60 border border-amber-500/50 text-amber-300
-           rounded-lg px-4 py-2 text-sm flex items-center gap-2;
+    @apply w-full bg-amber-50 border border-amber-200 text-amber-900
+           rounded-xl px-4 py-3 text-sm flex items-center gap-2.5 mb-4 shadow-subtle;
   }
 }
 
-/* Flash animation for new Called token on TV */
-@keyframes flash-gold {
-  0%, 100% { background-color: transparent; }
-  25%, 75% { background-color: rgba(212, 160, 23, 0.4); }
+/* TV Flash animation for new Called token */
+@keyframes flash-pista {
+  0%, 100% { background-color: #FFFFFF; }
+  25%, 75% { background-color: #C1D9A5; }
 }
 
-.flash-gold {
-  animation: flash-gold 1.5s ease-in-out 3;
+.flash-pista {
+  animation: flash-pista 1.4s ease-in-out 3;
 }
 
-/* Circular wait indicator pulse */
-@keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 1; }
-  100% { transform: scale(1.1); opacity: 0; }
+/* Waiting pulse ring */
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 0.85; }
 }
 
-.pulse-ring {
-  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+.pulse-subtle {
+  animation: pulse-subtle 2.5s ease-in-out infinite;
 }

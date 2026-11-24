@@ -1,34 +1,88 @@
 // src/components/StatusBadge.jsx
-// Renders a coloured badge for EntryStatus or BarberStatus.
+// Minimalist pill badges with Lucide icons
 
 import { useLang } from '../context/LangContext';
-
-const ENTRY_COLOURS = {
-  WAITING:   'bg-blue-900/60 text-blue-300 border border-blue-600/40',
-  CALLED:    'bg-gold/20 text-gold border border-gold/40',
-  IN_CHAIR:  'bg-green-900/60 text-green-300 border border-green-600/40',
-  DONE:      'bg-charcoal-600 text-charcoal-300 border border-charcoal-500',
-  CANCELLED: 'bg-charcoal-600 text-charcoal-400 border border-charcoal-500',
-  NO_SHOW:   'bg-red-900/60 text-red-300 border border-red-600/40',
-};
-
-const BARBER_COLOURS = {
-  AVAILABLE: 'bg-green-900/60 text-green-300 border border-green-600/40',
-  BUSY:      'bg-gold/20 text-gold border border-gold/40',
-  ON_BREAK:  'bg-amber-900/60 text-amber-300 border border-amber-600/40',
-  OFF_DUTY:  'bg-charcoal-600 text-charcoal-400 border border-charcoal-500',
-};
+import { Clock, Bell, Scissors, Check, X, AlertOctagon, Sparkles, Coffee, Moon } from 'lucide-react';
 
 export function StatusBadge({ status, type = 'entry', className = '' }) {
   const { t } = useLang();
-  const colourMap = type === 'barber' ? BARBER_COLOURS : ENTRY_COLOURS;
-  const labelMap  = type === 'barber' ? t.barberStatus : t.status;
-  const colour    = colourMap[status] || 'bg-charcoal-600 text-charcoal-300';
-  const label     = labelMap?.[status] || status;
+
+  if (type === 'barber') {
+    const config = {
+      AVAILABLE: {
+        bg: 'bg-pista-light text-deepgreen border-pista',
+        icon: Sparkles,
+        label: t.barberStatus.AVAILABLE,
+      },
+      BUSY: {
+        bg: 'bg-amber-50 text-amber-800 border-amber-200',
+        icon: Scissors,
+        label: t.barberStatus.BUSY,
+      },
+      ON_BREAK: {
+        bg: 'bg-slate-100 text-slate-700 border-slate-200',
+        icon: Coffee,
+        label: t.barberStatus.ON_BREAK,
+      },
+      OFF_DUTY: {
+        bg: 'bg-neutral-100 text-neutral-500 border-neutral-200',
+        icon: Moon,
+        label: t.barberStatus.OFF_DUTY,
+      },
+    };
+
+    const cfg = config[status] || { bg: 'bg-neutral-100 text-neutral-600 border-neutral-200', icon: Clock, label: status };
+    const Icon = cfg.icon;
+
+    return (
+      <span className={`badge ${cfg.bg} ${className}`}>
+        <Icon className="w-3.5 h-3.5" />
+        <span>{cfg.label}</span>
+      </span>
+    );
+  }
+
+  // Queue Entry statuses
+  const config = {
+    WAITING: {
+      bg: 'bg-blue-50 text-blue-700 border-blue-200',
+      icon: Clock,
+      label: t.status.WAITING,
+    },
+    CALLED: {
+      bg: 'bg-pista text-softblack border-pista-dark font-bold shadow-subtle',
+      icon: Bell,
+      label: t.status.CALLED,
+    },
+    IN_CHAIR: {
+      bg: 'bg-pista-light text-deepgreen border-pista',
+      icon: Scissors,
+      label: t.status.IN_CHAIR,
+    },
+    DONE: {
+      bg: 'bg-offwhite text-softblack-muted border-softblack-border',
+      icon: Check,
+      label: t.status.DONE,
+    },
+    CANCELLED: {
+      bg: 'bg-neutral-100 text-neutral-500 border-neutral-200',
+      icon: X,
+      label: t.status.CANCELLED,
+    },
+    NO_SHOW: {
+      bg: 'bg-red-50 text-red-700 border-red-200',
+      icon: AlertOctagon,
+      label: t.status.NO_SHOW,
+    },
+  };
+
+  const cfg = config[status] || { bg: 'bg-neutral-100 text-neutral-600 border-neutral-200', icon: Clock, label: status };
+  const Icon = cfg.icon;
 
   return (
-    <span className={`badge ${colour} ${className}`}>
-      {label}
+    <span className={`badge ${cfg.bg} ${className}`}>
+      <Icon className="w-3.5 h-3.5" />
+      <span>{cfg.label}</span>
     </span>
   );
 }
