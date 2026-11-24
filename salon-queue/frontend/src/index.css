@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-charcoal-800 text-white min-h-screen;
+  }
+
+  /* Ensure all interactive elements meet 44px minimum touch target */
+  button, a, [role="button"] {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+@layer components {
+  /* Gold primary button */
+  .btn-primary {
+    @apply bg-gold text-charcoal-900 font-semibold rounded-xl px-6 py-3
+           min-h-[44px] flex items-center justify-center gap-2
+           transition-all duration-150
+           hover:bg-gold-light active:bg-gold-dark
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  /* Ghost/secondary button */
+  .btn-secondary {
+    @apply border border-charcoal-600 text-charcoal-200 font-medium rounded-xl px-6 py-3
+           min-h-[44px] flex items-center justify-center gap-2
+           transition-all duration-150
+           hover:bg-charcoal-700 active:bg-charcoal-600
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply bg-red-700 text-white font-semibold rounded-xl px-6 py-3
+           min-h-[44px] flex items-center justify-center gap-2
+           transition-all duration-150
+           hover:bg-red-600 active:bg-red-800
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  /* Card container */
+  .card {
+    @apply bg-charcoal-700 rounded-2xl p-4 shadow-lg;
+  }
+
+  /* Gold-accented card */
+  .card-gold {
+    @apply card border border-gold/30;
+  }
+
+  /* Form input */
+  .input {
+    @apply w-full bg-charcoal-800 border border-charcoal-600 rounded-xl px-4 py-3
+           text-white placeholder-charcoal-400
+           focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent
+           min-h-[44px];
+  }
+
+  /* Inline error text */
+  .field-error {
+    @apply text-red-400 text-sm mt-1;
+  }
+
+  /* Status badge base */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  /* Stale data banner */
+  .stale-banner {
+    @apply w-full bg-amber-900/60 border border-amber-500/50 text-amber-300
+           rounded-lg px-4 py-2 text-sm flex items-center gap-2;
+  }
+}
+
+/* Flash animation for new Called token on TV */
+@keyframes flash-gold {
+  0%, 100% { background-color: transparent; }
+  25%, 75% { background-color: rgba(212, 160, 23, 0.4); }
+}
+
+.flash-gold {
+  animation: flash-gold 1.5s ease-in-out 3;
+}
+
+/* Circular wait indicator pulse */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
