@@ -1,7 +1,7 @@
 // src/pages/BarberView.jsx
-// Screen 5: /barber/:name — Barber manages their own station.
+// Screen 5: /barber/:name — Minimalist mobile-first chair terminal for barbers
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { useApi } from '../hooks/useApi';
@@ -12,9 +12,14 @@ import { Header } from '../components/Header';
 import { StatusBadge } from '../components/StatusBadge';
 import { StaleWarning } from '../components/StaleWarning';
 import { Spinner } from '../components/ui/Spinner';
+import {
+  Scissors, Play, CheckCircle2, Coffee, Moon, Clock,
+  User, Sparkles, AlertCircle, ArrowRight
+} from 'lucide-react';
 
 function useElapsedTimer(startDate) {
   const [elapsed, setElapsed] = useState(0);
+
   useEffect(() => {
     if (!startDate) { setElapsed(0); return; }
     const tick = () => setElapsed(Math.floor((Date.now() - new Date(startDate)) / 1000));
@@ -22,15 +27,16 @@ function useElapsedTimer(startDate) {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [startDate]);
+
   const m = Math.floor(elapsed / 60);
   const s = elapsed % 60;
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 export default function BarberView() {
   const { name } = useParams();
   const { t, lang } = useLang();
-  const { logout, staff } = useAuth();
+  const { logout } = useAuth();
   const api = useApi();
   const navigate = useNavigate();
   const { connected } = useSocket();
@@ -61,117 +67,183 @@ export default function BarberView() {
 
   async function doAction(key, fn) {
     setBusy((p) => ({ ...p, [key]: true }));
-    try { await fn(); await fetchData(); setError(null); }
-    catch (e) { setError(e.message); }
-    finally { setBusy((p) => ({ ...p, [key]: false })); }
+    try {
+      await fn();
+      await fetchData();
+      setError(null);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy((p) => ({ ...p, [key]: false }));
+    }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-3">
+        <Spinner size="lg" />
+        <p className="text-xs text-softblack-muted font-medium">{t.loading}</p>
+      </div>
+    );
+  }
 
-  const barber  = data?.barber;
-  const current = data?.current;
-  const next    = data?.next;
+  const barber     = data?.barber;
+  const current    = data?.current;
+  const next       = data?.next;
   const isOffDuty  = !barber?.onDuty;
   const isOnBreak  = barber?.status === 'ON_BREAK';
   const isCalled   = current?.status === 'CALLED';
   const isInChair  = current?.status === 'IN_CHAIR';
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header>
-        <div className="flex items-center gap-2">
-          <span className="text-charcoal-200 font-medium text-sm">{name}</span>
-          {barber && <StatusBadge status={barber.status} type="barber" />}
-        </div>
-        <button onClick={() => { logout(); navigate('/login'); }} className="btn-secondary text-sm px-3 py-2 min-h-[36px]">
-          {t.barber.signOut}
-        </button>
-      </Header>
+    <div className="min-h-screen bg-offwhite flex flex-col">
+      <Header />
 
-      <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
+      <main className="flex-1 max-w-lg mx-auto w-full px-4 py-6 space-y-6">
         <StaleWarning visible={!connected} />
 
         {error && (
-          <div className="card border border-red-700/40 mb-4 text-red-300 text-sm">{error}</div>
+          <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs font-medium">
+            {error}
+          </div>
         )}
 
+        {/* Stylist Station Header Card */}
+        <div className="bg-white rounded-3xl p-5 border border-softblack-border/80 shadow-subtle flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-pista-light border border-pista flex items-center justify-center font-black text-deepgreen text-base">
+              {name[0]}
+            </div>
+            <div>
+              <h1 className="font-extrabold text-softblack text-lg font-display">{t.barber.title(name)}</h1>
+              <p className="text-xs text-softblack-muted">Workstation Console</p>
+            </div>
+          </div>
+          {barber && <StatusBadge status={barber.status} type="barber" />}
+        </div>
+
         {isOffDuty ? (
-          <div className="card text-center py-10">
-            <p className="text-2xl mb-2">🌙</p>
-            <p className="text-charcoal-300">{t.barber.offDuty}</p>
+          <div className="bg-white rounded-3xl p-8 border border-softblack-border/80 shadow-subtle text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-500 flex items-center justify-center mx-auto">
+              <Moon className="w-6 h-6" />
+            </div>
+            <h2 className="text-lg font-bold text-softblack">{t.barber.offDuty}</h2>
+            <p className="text-xs text-softblack-muted max-w-xs mx-auto">
+              You are currently marked off duty by salon management. Please contact reception to start your shift.
+            </p>
           </div>
         ) : (
           <>
-            {/* Current customer */}
-            <div className="card-gold mb-4">
-              <h2 className="text-xs font-semibold text-charcoal-400 uppercase tracking-wider mb-3">
-                {t.barber.current}
-              </h2>
+            {/* Active Station Card */}
+            <div className="bg-white rounded-3xl p-6 border border-softblack-border/80 shadow-card space-y-5">
+              <div className="flex items-center justify-between border-b border-softblack-border/60 pb-3">
+                <span className="text-xs font-bold text-softblack uppercase tracking-wider">
+                  {t.barber.current}
+                </span>
+                {current && <StatusBadge status={current.status} />}
+              </div>
 
               {!current ? (
-                <p className="text-charcoal-300 text-center py-4">{t.barber.noCustomer}</p>
+                <div className="py-10 text-center space-y-2">
+                  <Scissors className="w-8 h-8 text-pista mx-auto" />
+                  <p className="text-sm font-bold text-softblack">{t.barber.noCustomer}</p>
+                  <p className="text-xs text-softblack-muted">Reception will call the next waiting client for your chair.</p>
+                </div>
               ) : (
-                <>
-                  <div className="flex items-start justify-between mb-3">
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-3xl font-black text-gold">#{current.tokenNumber}</p>
-                      <p className="text-white font-semibold">{current.customerName}</p>
+                      <p className="text-xs text-softblack-muted uppercase font-bold tracking-wider">Token</p>
+                      <p className="text-5xl font-black text-softblack font-display">#{current.tokenNumber}</p>
+                      <p className="text-sm font-bold text-deepgreen mt-1">{current.customerName}</p>
                     </div>
-                    <StatusBadge status={current.status} />
                   </div>
-                  <ul className="mb-3 space-y-1">
-                    {current.services.map((s, i) => (
-                      <li key={i} className="text-sm text-charcoal-200 flex justify-between">
-                        <span>{lang==='gu'?s.nameGu:s.nameEn}</span>
-                        <span className="text-charcoal-400">{s.durationMin}m</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                  {/* Services List */}
+                  <div className="bg-offwhite rounded-2xl p-4 border border-softblack-border/60 space-y-2">
+                    <p className="text-[11px] font-bold text-softblack-muted uppercase tracking-wider">Requested Services</p>
+                    <ul className="space-y-1.5">
+                      {current.services.map((s, idx) => (
+                        <li key={idx} className="flex justify-between text-xs text-softblack font-medium">
+                          <span>{lang === 'gu' ? s.nameGu : s.nameEn}</span>
+                          <span className="text-softblack-muted">{s.durationMin} mins</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Live Service Duration Timer (when In Chair) */}
                   {isInChair && (
-                    <div className="text-center bg-charcoal-800 rounded-lg py-2 mb-3">
-                      <p className="text-xs text-charcoal-400">{t.barber.timer}</p>
-                      <p className="text-2xl font-mono font-bold text-gold">{timer}</p>
+                    <div className="bg-pista-light rounded-2xl p-4 text-center border border-pista/60">
+                      <p className="text-[11px] font-bold text-deepgreen uppercase tracking-wider mb-1">
+                        {t.barber.timer}
+                      </p>
+                      <p className="text-4xl font-black text-deepgreen font-mono">{timer}</p>
                     </div>
                   )}
-                </>
-              )}
 
-              {/* Action buttons */}
-              <div className="flex gap-3 mt-2">
-                <button
-                  disabled={!isCalled || busy.start}
-                  onClick={() => doAction('start', () => api.post(`/api/barbers/${name}/start`))}
-                  className="btn-primary flex-1"
-                >
-                  {busy.start ? <Spinner size="sm" /> : t.barber.start}
-                </button>
-                <button
-                  disabled={!isInChair || busy.done}
-                  onClick={() => doAction('done', () => api.post(`/api/barbers/${name}/done`))}
-                  className="btn-secondary flex-1"
-                >
-                  {busy.done ? <Spinner size="sm" /> : t.barber.done}
-                </button>
-              </div>
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <button
+                      disabled={!isCalled || busy.start}
+                      onClick={() => doAction('start', () => api.post(`/api/barbers/${name}/start`))}
+                      className="btn-primary text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-2"
+                    >
+                      {busy.start ? <Spinner size="sm" /> : (
+                        <>
+                          <Play className="w-4 h-4 fill-current" />
+                          <span>{t.barber.start}</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      disabled={!isInChair || busy.done}
+                      onClick={() => doAction('done', () => api.post(`/api/barbers/${name}/done`))}
+                      className="btn-dark text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-2"
+                    >
+                      {busy.done ? <Spinner size="sm" className="border-white" /> : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{t.barber.done}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Break toggle */}
+            {/* Break Toggle Button */}
             <button
               disabled={!!current || busy.break}
               onClick={() => doAction('break', () => api.post(`/api/barbers/${name}/break`))}
-              className={`w-full mb-4 ${isOnBreak ? 'btn-primary' : 'btn-secondary'}`}
+              className={`w-full py-3.5 rounded-2xl text-xs font-bold transition-all shadow-subtle flex items-center justify-center gap-2 ${
+                isOnBreak
+                  ? 'btn-primary'
+                  : 'btn-secondary hover:bg-pista-light hover:border-pista hover:text-deepgreen'
+              }`}
             >
-              {busy.break ? <Spinner size="sm" /> : isOnBreak ? t.barber.endBreak : t.barber.onBreak}
+              {busy.break ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <Coffee className="w-4 h-4" />
+                  <span>{isOnBreak ? t.barber.endBreak : t.barber.onBreak}</span>
+                </>
+              )}
             </button>
 
-            {/* Next customer preview */}
+            {/* Next Customer Preview */}
             {next && (
-              <div className="card">
-                <h3 className="text-xs font-semibold text-charcoal-400 uppercase tracking-wider mb-2">{t.barber.nextFor}</h3>
-                <p className="text-gold font-bold">#{next.tokenNumber}</p>
-                <p className="text-xs text-charcoal-400">
-                  {next.services.map(s=>lang==='gu'?s.nameGu:s.nameEn).join(', ')}
-                  {next.barberPref !== 'ANY' && ` · ${next.barberPref}`}
+              <div className="bg-white rounded-3xl p-5 border border-softblack-border/80 shadow-subtle space-y-2">
+                <div className="flex items-center justify-between text-xs text-softblack-muted">
+                  <span className="font-bold uppercase tracking-wider">{t.barber.nextFor}</span>
+                  <span className="font-extrabold text-deepgreen">#{next.tokenNumber}</span>
+                </div>
+                <p className="text-xs text-softblack-muted">
+                  {next.services.map(s => lang === 'gu' ? s.nameGu : s.nameEn).join(', ')}
+                  {next.barberPref !== 'ANY' && ` &bull; Prefers ${next.barberPref}`}
                 </p>
               </div>
             )}

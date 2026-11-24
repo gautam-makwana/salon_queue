@@ -24,7 +24,7 @@ Customers often spend a long time waiting at salons without knowing when their t
 Online payments, advance appointments, SMS/WhatsApp, loyalty programmes, multiple branches, native mobile apps or complex analytics.
 
 ## Look and feel
-Premium salon aesthetic: dark charcoal (#1F2937), gold (#D4A017), warm neutral text, rounded cards, accessible contrast and mobile-first layouts.
+Premium, elegant and minimal salon aesthetic: White (#FFFFFF) primary background, Pista Green (#C1D9A5) primary accent, Soft Black (#171717) primary text, Off White (#F8F9F5) secondary background, Light Pista (#EDF5E5) highlighted sections and Deep Green (#547A43) active/accent text. Lucide icons, Plus Jakarta Sans / Manrope typography, rounded cards (12px–20px), accessible contrast and mobile-first responsive layouts.
 
 ## Success criteria
 All seven screens work; remote customers and walk-ins share one queue; barber preferences are respected; status updates reach all connected devices; the application is accessible through a deployed link.

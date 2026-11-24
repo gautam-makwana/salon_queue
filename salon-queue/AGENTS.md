@@ -18,7 +18,7 @@ Build a mobile-first salon queue app with customer, reception, barber, owner and
 
 ## Working rules
 - Implement only the requested build step. Read relevant docs before editing; ask about genuine conflicts before changing scope.
-- Keep charcoal (#1F2937) and gold (#D4A017), responsive layouts and accessible touch targets.
+- Keep modern minimalist White (#FFFFFF), Pista Green (#C1D9A5), Soft Black (#171717), Off White (#F8F9F5), Light Pista (#EDF5E5) and Deep Green (#547A43) palette, responsive layouts, Lucide icons and accessible touch targets.
 - Put UI labels and messages in EN/GU translation dictionaries.
 - Centralize queue logic; enforce critical rules atomically in shared storage. Do not duplicate calculations across screens.
 - Protect staff actions and customer details; never commit credentials or privileged keys. Document environment variables using `.env.example`.

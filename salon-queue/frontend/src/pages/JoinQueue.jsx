@@ -1,13 +1,16 @@
 // src/pages/JoinQueue.jsx
-// Screen 2: /join — Customer selects services, barber, confirms.
+// Screen 2: /join — Minimalist booking experience with pista selection states
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import { publicFetch } from '../hooks/useApi';
 import { Header } from '../components/Header';
-import { StatusBadge } from '../components/StatusBadge';
 import { Spinner } from '../components/ui/Spinner';
+import {
+  User, Phone, Scissors, Check, ArrowLeft, ArrowRight,
+  Clock, IndianRupee, Sparkles, AlertCircle
+} from 'lucide-react';
 
 const BARBER_OPTIONS = ['ANY', 'Ravi', 'Amit', 'Imran'];
 
@@ -41,7 +44,7 @@ export default function JoinQueue() {
   function toggleService(id) {
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 3) return prev; // max 3
+      if (prev.length >= 3) return prev; // max 3 limit
       return [...prev, id];
     });
     setErrors((e) => ({ ...e, services: null }));
@@ -80,13 +83,12 @@ export default function JoinQueue() {
       navigate(`/status/${data.id}`, { state: { fresh: true, tokenNumber: data.tokenNumber } });
     } catch (e) {
       if (e.status === 409 && e.data?.recovery) {
-        // Existing entry — navigate to their status
+        // Recover existing active spot
         navigate(`/status/${e.data.recovery.id}`, {
           state: { recovered: true, tokenNumber: e.data.recovery.tokenNumber },
         });
       } else {
         setSubmitError(e.message);
-        // Preserve form values
       }
     } finally {
       setSubmitting(false);
@@ -95,170 +97,284 @@ export default function JoinQueue() {
 
   if (loadingInit) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-3">
         <Spinner size="lg" />
+        <p className="text-xs text-softblack-muted font-medium">{t.loading}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header showHome>
-        <button onClick={() => navigate('/')} className="btn-secondary text-sm px-3 py-2 min-h-[36px]">
-          {t.back}
-        </button>
-      </Header>
+    <div className="min-h-screen bg-offwhite flex flex-col">
+      <Header />
 
-      <main className="flex-1 px-4 py-6 max-w-2xl mx-auto w-full">
-        <h1 className="text-2xl font-bold text-white mb-6">{t.join.title}</h1>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-8">
+        {/* Navigation Breadcrumb */}
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            onClick={() => navigate('/')}
+            className="btn-secondary text-xs px-3.5 py-2 rounded-xl inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4 text-deepgreen" />
+            <span>{t.back}</span>
+          </button>
+          <span className="text-xs font-bold text-deepgreen bg-pista-light px-3 py-1.5 rounded-full border border-pista/50">
+            Step 1 of 2: Join Queue
+          </span>
+        </div>
 
         {submitError && (
-          <div className="card border border-red-700/40 mb-4 text-red-300 text-sm">{submitError}</div>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs sm:text-sm font-medium flex items-center gap-2 shadow-subtle">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{submitError}</span>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Name */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-charcoal-200 mb-1">{t.join.name}</label>
-            <input
-              className="input"
-              type="text"
-              placeholder={t.join.namePlaceholder}
-              value={name}
-              onChange={(e) => { setName(e.target.value); setErrors((x) => ({ ...x, name: null })); }}
-              autoComplete="name"
-            />
-            {errors.name && <p className="field-error">{errors.name}</p>}
-          </div>
+        {/* 2-Column Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Form: Details, Services, Barber preference */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-softblack-border/80 shadow-subtle space-y-6">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-softblack tracking-tight font-display">
+                  {t.join.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-softblack-muted mt-1">
+                  {t.join.subtitle}
+                </p>
+              </div>
 
-          {/* Phone */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-charcoal-200 mb-1">{t.join.phone}</label>
-            <input
-              className="input"
-              type="tel"
-              inputMode="numeric"
-              placeholder={t.join.phonePlaceholder}
-              value={phone}
-              maxLength={10}
-              onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '')); setErrors((x) => ({ ...x, phone: null })); }}
-              autoComplete="tel"
-            />
-            {errors.phone && <p className="field-error">{errors.phone}</p>}
-          </div>
+              {/* Client Info Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-softblack uppercase tracking-wider mb-1.5">
+                    {t.join.name}
+                  </label>
+                  <div className="relative">
+                    <input
+                      className="input pl-10"
+                      type="text"
+                      placeholder={t.join.namePlaceholder}
+                      value={name}
+                      onChange={(e) => { setName(e.target.value); setErrors((x) => ({ ...x, name: null })); }}
+                      autoComplete="name"
+                    />
+                    <User className="w-4 h-4 text-softblack-muted absolute left-3.5 top-3.5" />
+                  </div>
+                  {errors.name && <p className="field-error">{errors.name}</p>}
+                </div>
 
-          {/* Services */}
-          <div className="mb-6">
-            <h2 className="text-sm font-semibold text-charcoal-400 uppercase tracking-wider mb-3">
-              {t.join.services}
-            </h2>
-            {services.length === 0 ? (
-              <p className="text-charcoal-400 text-sm">{t.join.emptyServices}</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {services.map((svc) => {
-                  const selected = selectedIds.includes(svc.id);
-                  const disabled = !selected && selectedIds.length >= 3;
-                  return (
-                    <button
-                      key={svc.id}
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => toggleService(svc.id)}
-                      className={`card text-left transition-all ${
-                        selected
-                          ? 'border-2 border-gold ring-1 ring-gold/30'
-                          : 'border border-charcoal-600 hover:border-charcoal-500'
-                      } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                      aria-pressed={selected}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-semibold text-white text-sm">
-                            {lang === 'gu' ? svc.nameGu : svc.nameEn}
+                <div>
+                  <label className="block text-xs font-bold text-softblack uppercase tracking-wider mb-1.5">
+                    {t.join.phone}
+                  </label>
+                  <div className="relative">
+                    <input
+                      className="input pl-10"
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder={t.join.phonePlaceholder}
+                      value={phone}
+                      maxLength={10}
+                      onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '')); setErrors((x) => ({ ...x, phone: null })); }}
+                      autoComplete="tel"
+                    />
+                    <Phone className="w-4 h-4 text-softblack-muted absolute left-3.5 top-3.5" />
+                  </div>
+                  {errors.phone && <p className="field-error">{errors.phone}</p>}
+                </div>
+              </div>
+
+              {/* Service Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h2 className="text-sm font-bold text-softblack uppercase tracking-wider">
+                      {t.join.services}
+                    </h2>
+                    <p className="text-[11px] text-softblack-muted">{t.join.servicesHelp}</p>
+                  </div>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                    selectedIds.length === 3
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-pista-light text-deepgreen'
+                  }`}>
+                    {selectedIds.length}/3 selected
+                  </span>
+                </div>
+
+                {services.length === 0 ? (
+                  <p className="text-softblack-muted text-sm">{t.join.emptyServices}</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {services.map((svc) => {
+                      const isSelected = selectedIds.includes(svc.id);
+                      const isLimitReached = !isSelected && selectedIds.length >= 3;
+
+                      return (
+                        <button
+                          key={svc.id}
+                          type="button"
+                          disabled={isLimitReached}
+                          onClick={() => toggleService(svc.id)}
+                          className={`rounded-2xl p-4 text-left transition-all duration-200 border ${
+                            isSelected
+                              ? 'bg-pista-light border-deepgreen ring-1 ring-deepgreen shadow-subtle'
+                              : 'bg-white border-softblack-border/80 hover:border-pista hover:bg-offwhite'
+                          } ${isLimitReached ? 'opacity-40 cursor-not-allowed' : 'active:scale-[0.99]'}`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-softblack text-sm">
+                                {lang === 'gu' ? svc.nameGu : svc.nameEn}
+                              </p>
+                              <div className="flex items-center gap-3 mt-1.5 text-xs text-softblack-muted font-medium">
+                                <span className="inline-flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 text-deepgreen" />
+                                  <span>{svc.durationMin}m</span>
+                                </span>
+                                <span>&bull;</span>
+                                <span className="inline-flex items-center font-bold text-softblack">
+                                  ₹{svc.price}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={`w-6 h-6 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                              isSelected
+                                ? 'bg-deepgreen text-white'
+                                : 'border border-softblack-border bg-offwhite'
+                            }`}>
+                              {isSelected && <Check className="w-3.5 h-3.5" />}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {errors.services && <p className="field-error mt-2">{errors.services}</p>}
+              </div>
+
+              {/* Stylist Selection */}
+              <div>
+                <h2 className="text-sm font-bold text-softblack uppercase tracking-wider mb-3">
+                  {t.join.barberPref}
+                </h2>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {BARBER_OPTIONS.map((opt) => {
+                    const barber = barbers.find((b) => b.name === opt);
+                    const isOffDuty = barber && !barber.onDuty;
+                    const isSelected = barberPref === opt;
+
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        disabled={isOffDuty}
+                        onClick={() => setBarberPref(opt)}
+                        className={`rounded-2xl p-3.5 text-center transition-all duration-200 border ${
+                          isSelected
+                            ? 'bg-pista-light border-deepgreen ring-1 ring-deepgreen'
+                            : 'bg-white border-softblack-border/80 hover:border-pista hover:bg-offwhite'
+                        } ${isOffDuty ? 'opacity-40 cursor-not-allowed bg-neutral-50' : 'active:scale-[0.99]'}`}
+                      >
+                        <p className="font-bold text-xs sm:text-sm text-softblack leading-tight">
+                          {opt === 'ANY' ? t.join.anyBarber : opt}
+                        </p>
+                        {barber && (
+                          <p className={`text-[10px] font-bold mt-1.5 ${
+                            barber.status === 'AVAILABLE' ? 'text-deepgreen' :
+                            barber.status === 'ON_BREAK'  ? 'text-amber-700' : 'text-softblack-muted'
+                          }`}>
+                            {t.barberStatus[barber.status]}
                           </p>
-                          <p className="text-charcoal-400 text-xs mt-0.5">
-                            {svc.durationMin} min · ₹{svc.price}
-                          </p>
-                        </div>
-                        {selected && (
-                          <span className="text-gold text-lg leading-none">✓</span>
                         )}
-                      </div>
-                    </button>
-                  );
-                })}
+                        {opt === 'ANY' && (
+                          <p className="text-[10px] text-deepgreen font-semibold mt-1">Recommended</p>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-            {errors.services && <p className="field-error mt-2">{errors.services}</p>}
-          </div>
-
-          {/* Barber preference */}
-          <div className="mb-6">
-            <h2 className="text-sm font-semibold text-charcoal-400 uppercase tracking-wider mb-3">
-              {t.join.barberPref}
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {BARBER_OPTIONS.map((opt) => {
-                const barber = barbers.find((b) => b.name === opt);
-                const isOffDuty = barber && !barber.onDuty;
-                const selected  = barberPref === opt;
-                return (
-                  <button
-                    key={opt}
-                    type="button"
-                    disabled={isOffDuty}
-                    onClick={() => setBarberPref(opt)}
-                    className={`card text-center py-3 transition-all ${
-                      selected ? 'border-2 border-gold' : 'border border-charcoal-600'
-                    } ${isOffDuty ? 'opacity-40 cursor-not-allowed' : ''}`}
-                    aria-pressed={selected}
-                  >
-                    <p className="font-medium text-sm text-white">
-                      {opt === 'ANY' ? t.join.anyBarber : opt}
-                    </p>
-                    {barber && (
-                      <p className={`text-xs mt-0.5 ${
-                        barber.status === 'AVAILABLE' ? 'text-green-400' :
-                        barber.status === 'ON_BREAK'  ? 'text-amber-400' : 'text-charcoal-400'
-                      }`}>
-                        {t.barberStatus[barber.status]}
-                      </p>
-                    )}
-                  </button>
-                );
-              })}
             </div>
           </div>
 
-          {/* Summary */}
-          {selectedServices.length > 0 && (
-            <div className="card-gold mb-6">
-              <h3 className="font-semibold text-gold mb-2 text-sm">{t.join.summary}</h3>
-              <ul className="space-y-1 mb-3">
-                {selectedServices.map((s) => (
-                  <li key={s.id} className="flex justify-between text-sm text-charcoal-200">
-                    <span>{lang === 'gu' ? s.nameGu : s.nameEn}</span>
-                    <span>₹{s.price}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="border-t border-charcoal-600 pt-2 flex justify-between text-sm font-semibold text-white">
-                <span>{totalDuration} min</span>
-                <span>₹{totalPrice}</span>
+          {/* Right Column: Sticky Summary & Confirmation */}
+          <div className="lg:col-span-5 sticky top-20 space-y-4">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-softblack-border/80 shadow-card">
+              <div className="flex items-center gap-2 pb-4 mb-4 border-b border-softblack-border/60">
+                <Sparkles className="w-5 h-5 text-deepgreen" />
+                <h3 className="text-base font-extrabold text-softblack tracking-tight font-display">
+                  {t.join.summary}
+                </h3>
               </div>
-            </div>
-          )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={submitting || services.length === 0}
-            className="btn-primary w-full text-base py-4"
-          >
-            {submitting ? <Spinner size="sm" /> : t.join.confirmJoin}
-          </button>
-        </form>
+              {selectedServices.length === 0 ? (
+                <div className="py-8 text-center text-softblack-muted text-xs">
+                  <Scissors className="w-8 h-8 text-pista mx-auto mb-2 opacity-80" />
+                  <p>Select at least 1 service to view estimated time and price breakdown</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Selected items list */}
+                  <ul className="space-y-2.5">
+                    {selectedServices.map((s) => (
+                      <li key={s.id} className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="font-medium text-softblack-secondary">
+                          {lang === 'gu' ? s.nameGu : s.nameEn}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-softblack-muted text-xs">{s.durationMin}m</span>
+                          <span className="font-bold text-softblack">₹{s.price}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Stylist line */}
+                  <div className="py-2.5 px-3 bg-offwhite rounded-xl text-xs flex justify-between items-center text-softblack-secondary">
+                    <span className="text-softblack-muted">{t.join.barberPref}:</span>
+                    <span className="font-bold text-deepgreen">
+                      {barberPref === 'ANY' ? t.join.anyBarber : barberPref}
+                    </span>
+                  </div>
+
+                  {/* Totals */}
+                  <div className="pt-4 border-t border-softblack-border/60 space-y-2">
+                    <div className="flex justify-between text-xs text-softblack-muted">
+                      <span>{t.join.totalDuration}</span>
+                      <span className="font-semibold text-softblack">{totalDuration} mins</span>
+                    </div>
+                    <div className="flex justify-between text-base font-extrabold text-softblack">
+                      <span>{t.join.totalPrice}</span>
+                      <span className="text-deepgreen text-xl font-display">₹{totalPrice}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="button"
+                disabled={submitting || selectedServices.length === 0}
+                onClick={handleSubmit}
+                className="btn-primary w-full mt-6 py-4 rounded-2xl text-base font-bold shadow-card flex items-center justify-center gap-2"
+              >
+                {submitting ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <>
+                    <span>{t.join.confirmJoin}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
