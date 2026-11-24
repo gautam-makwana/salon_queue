@@ -9,6 +9,7 @@
     "start": "node src/index.js",
     "build": "prisma generate",
     "postinstall": "prisma generate",
+    "start:prod": "npx prisma migrate deploy && node prisma/seed.js && node src/index.js",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
