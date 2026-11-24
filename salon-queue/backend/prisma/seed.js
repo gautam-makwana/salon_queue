@@ -20,7 +20,7 @@ async function main() {
     create: {
       id: 1,
       onlineQueueOpen: true,
-      closingTime: '21:00',
+      closingTime: '23:59',
       openingTime: '09:00',
     },
   });

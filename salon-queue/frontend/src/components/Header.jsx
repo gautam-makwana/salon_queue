@@ -1,16 +1,19 @@
 // src/components/Header.jsx
-// Premium minimalist header with Salon branding, TV link, Staff Portal access and Language Toggle.
+// Premium minimalist header with Salon branding, Join Queue CTA, TV link, Staff Portal access and Language Toggle.
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LangToggle } from './LangToggle';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
-import { Scissors, Tv, UserCog, LogOut, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Scissors, Tv, UserCog, LogOut, LayoutDashboard, UserPlus, PlusCircle } from 'lucide-react';
 
 export function Header({ children, showHome = true }) {
   const { t } = useLang();
   const { isLoggedIn, staff, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isJoinPage = location.pathname === '/join';
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-softblack-border/80 px-4 sm:px-8 py-3.5 transition-all">
@@ -41,6 +44,18 @@ export function Header({ children, showHome = true }) {
 
         {/* Right Navigation & Tools */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Prominent "Join Queue" CTA in Header if not already on /join */}
+          {!isJoinPage && (
+            <Link
+              to="/join"
+              className="btn-primary text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-subtle inline-flex items-center gap-1.5"
+              title="Request salon services and join the live queue"
+            >
+              <PlusCircle className="w-3.5 h-3.5 text-deepgreen" />
+              <span>{t.home.joinQueue}</span>
+            </Link>
+          )}
+
           {/* Waiting Area TV Link */}
           <Link
             to="/display"
@@ -74,7 +89,7 @@ export function Header({ children, showHome = true }) {
           ) : (
             <Link
               to="/login"
-              className="btn-secondary text-xs px-3.5 py-1.5 rounded-xl border border-softblack-border hover:border-pista hover:bg-pista-light hover:text-deepgreen font-semibold"
+              className="btn-secondary text-xs px-3 py-1.5 rounded-xl border border-softblack-border hover:border-pista hover:bg-pista-light hover:text-deepgreen font-semibold"
               title="Barber, Receptionist & Owner Console"
             >
               <UserCog className="w-3.5 h-3.5 text-deepgreen" />
